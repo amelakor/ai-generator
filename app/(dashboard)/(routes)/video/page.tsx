@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 import * as z from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -15,9 +15,11 @@ import { Button } from "@/components/ui/button";
 import { formSchema } from "./constants";
 import { Loader } from "@/components/loader";
 import { Empty } from "@/components/empty";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const VideoPage = () => {
     const router = useRouter();
+    const proModal = useProModal();
 
     const [video, setVideo] = useState<string>();
 
@@ -39,7 +41,11 @@ const VideoPage = () => {
 
             form.reset();
         } catch (error: any) {
-            console.log(error);
+            if (error?.response?.status === 403) {
+                proModal.onOpen();
+            } else {
+                toast.error("Something went wrong.");
+            }
         } finally {
             router.refresh();
         }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import * as z from "zod";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Heading } from "@/components/heading";
@@ -18,9 +19,11 @@ import { Loader } from "@/components/loader";
 import { Empty } from "@/components/empty";
 import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const Conversation = () => {
     const router = useRouter();
+    const proModal = useProModal();
 
     const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>(
         []
@@ -50,7 +53,11 @@ const Conversation = () => {
             setMessages((current) => [...current, userMessage, response.data]);
             form.reset();
         } catch (error: any) {
-            console.log(error);
+            if (error?.response?.status === 403) {
+                proModal.onOpen();
+            } else {
+                toast.error("Something went wrong.");
+            }
         } finally {
             router.refresh();
         }

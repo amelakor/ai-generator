@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 import * as z from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -24,9 +24,11 @@ import {
 } from "@/components/ui/select";
 import { Card, CardFooter } from "@/components/ui/card";
 import { amountOptions, formSchema, resolutionOptions } from "./constants";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const ImagePage = () => {
     const router = useRouter();
+    const proModal = useProModal();
 
     const [images, setImages] = useState<string[]>([]);
 
@@ -55,7 +57,11 @@ const ImagePage = () => {
 
             form.reset();
         } catch (error: any) {
-            console.log(error);
+            if (error?.response?.status === 403) {
+                proModal.onOpen();
+            } else {
+                toast.error("Something went wrong.");
+            }
         } finally {
             router.refresh();
         }
