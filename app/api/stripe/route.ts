@@ -48,9 +48,12 @@ export async function GET() {
                         currency: "USD",
                         product_data: {
                             name: "Genius Pro",
-                            description: "Genius Pro Subscription",
+                            description: "Unlimited AI Generations",
                         },
-                        unit_amount: 1000,
+                        unit_amount: 2000,
+                        recurring: {
+                            interval: "month",
+                        },
                     },
                     quantity: 1,
                 },
