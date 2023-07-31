@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs";
 import { Configuration, OpenAIApi, ChatCompletionRequestMessage } from "openai";
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
+import { checkSubscription } from "@/lib/subscription";
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -37,8 +38,9 @@ export async function POST(request: Request) {
         }
 
         const freeTrial = await checkApiLimit();
+        const isPro = await checkSubscription();
 
-        if (!freeTrial) {
+        if (!freeTrial && !isPro) {
             return new NextResponse("You have reached the free trial limit", {
                 status: 403,
             });
@@ -49,7 +51,7 @@ export async function POST(request: Request) {
             messages: [instructionMessage, ...messages],
         });
 
-        await increaseApiLimit();
+        if (!isPro) await increaseApiLimit();
 
         return NextResponse.json(response.data.choices[0].message);
     } catch (e) {
